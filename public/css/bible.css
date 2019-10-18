@@ -1,4 +1,6 @@
-
+body{
+	min-height: 100vh;
+}
 h1,h2,h3,h4,h5, .search-result-head, .search-result-text-heading{
 	font-family: 'Roboto';
 	font-weight: 600;
@@ -38,9 +40,7 @@ h4{
 	font-weight: 600;
 	margin-bottom: 10px;
 }
-.esv-text p{
-	margin: 10px 0;
-}
+
 a{
 	color: #b30000;
 }
@@ -123,12 +123,14 @@ select{
 	
 }
 .officetext, .esv-text, .search-result{
-	
-
 	font-size: 15px;
-	font-family: Georgia;
+	font-family: Roboto;
 	max-width: 700px;
-	line-height: 1.5;
+	line-height: 1.8em;
+}
+
+.esv-text p{
+	margin: 10px 0;
 }
 
 .settings-btn{
@@ -155,9 +157,14 @@ select{
     .officetext, .esv-text {page-break-inside: avoid;}
 }
 
-.night{
-	background-color: hsl(0,0,20%); 
-	color: hsl(0,0,60%); 
+
+.night, .night .input, .night .button {
+	background-color: #2D2E30;
+	color: #e8eaed;
 }
+.night .input::placeholder, .night .title {
+	color: #e8eaed;
+}
+
 
 

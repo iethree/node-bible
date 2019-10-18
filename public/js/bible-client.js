@@ -91,4 +91,15 @@ function share(){
 		
 function toggleNight(){
 	document.body.classList.toggle('night');
+	let night = false;
+	if(localStorage.night==="true")
+		night = true;
+		
+	localStorage.setItem('night', !night);
 }
+
+function checkNight(){
+	if(localStorage.night==="true")
+		document.body.classList.add('night');
+}
+checkNight();
