@@ -1,0 +1,163 @@
+
+h1,h2,h3,h4,h5, .search-result-head, .search-result-text-heading{
+	font-family: 'Roboto';
+	font-weight: 600;
+}
+
+h1{
+	font-size: 28px;
+	color: #b30000;
+	margin: 20px 0px;
+}
+h2{
+	font-size: 20px;
+	margin: 15px 0px;
+}
+
+h3{
+	font-size: 15px;
+	padding-left: 0;
+}
+h4{
+	font-size: 15px;
+	font-style: italic;
+	padding-left: 0;
+	font-weight: 300;
+}
+.esv h2, .esv h3, .esv h4{
+	padding: 0 0 0 0;
+	
+}
+.is-narrow{
+	max-width: 100%;
+}
+.officetext p{
+	margin-top: 10px;
+}
+.officetext r{
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+.esv-text p{
+	margin: 10px 0;
+}
+a{
+	color: #b30000;
+}
+select{
+	color: #b30000;
+}
+
+.padded{
+	padding: 20px;
+}
+	
+.fa-search{
+	font-size: 14px;
+}
+
+.verse-num, .chapter-num{
+
+	position: relative; 
+	font-weight: 300;
+	top: -0.5em; 
+	font-size: 70%;
+	color: gray;
+}
+.search-term-1{
+	text-decoration: underline;
+
+}
+.hidden{
+	display: none;
+}
+.is-red{
+	background-color: #b30000;
+	color: white;
+}
+.is-red:hover{
+	background-color: #c60000;
+	color: white;
+}
+
+.active{
+	border-left: solid 2px #b30000;
+	margin-left: -2px; 
+	opacity: 1;
+}
+.fade{
+	opacity: 0.8;
+}
+.centered, .row-centered {
+    text-align:center;
+}
+.line{
+	display: inline-block;
+	padding-left: 0em;
+	text-indent: -0.5em;
+}
+.indent, blockquote{
+	display: inline-block;
+	padding-left: 1em !important;
+	text-indent: -1em !important;
+}
+.surrounding-chapters{
+	display: none;
+}
+.nextCH{
+	position: fixed;
+	height: 100vh;
+	width: 20px;
+	right: 0px;
+	opacity: 0.1;
+	z-index: 99;
+	
+}
+.lastCH{
+	position: fixed;
+	height: 100vh;
+	width: 20px;
+	left: 0px;
+	opacity: 0.1;
+	z-index: 99;
+	
+}
+.officetext, .esv-text, .search-result{
+	
+
+	font-size: 15px;
+	font-family: Georgia;
+	max-width: 700px;
+	line-height: 1.5;
+}
+
+.settings-btn{
+	position:absolute;
+	top:5px;
+	right:5px;
+}
+.home-btn{
+	position:absolute;
+	top:5px;
+	left:20px;
+}
+#loader{
+	
+	position: fixed;
+	top: 20vh;
+	left: 45vw;
+	height: 40px;
+	width: 40px;
+	
+}
+
+@media print {
+    .officetext, .esv-text {page-break-inside: avoid;}
+}
+
+.night{
+	background-color: hsl(0,0,20%); 
+	color: hsl(0,0,60%); 
+}
+
+

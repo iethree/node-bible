@@ -1,0 +1,44 @@
+extends bible-head
+
+block content
+
+	div.container.wrap.padded
+	
+		a(href=prev).lastCH
+			i.fa.fa-caret-left
+		a(href=next).nextCH
+			i.fa-fa-caret-right
+		
+		div.columns.is-centered
+
+			div#loader
+			div.column.is-4.has-text-centered
+				div
+					a(href='/').title.is-5 Bible
+				div.field.has-addons
+					div.control.is-expanded
+						input(placeholder="Search", type="text")#get.input.is-small
+					div.control
+						button#search.button.is-small
+							i.fa.fa-search
+						
+		div.columns.is-centered
+			div.column.is-narrow
+				div
+					if text == "" || text == "no results"
+						!=text
+						br
+						br
+						div#recent.field.is-grouped.is-grouped-multiline.is-grouped-centered
+						br
+						br
+						div.has-text-centered
+							button.button#toggle-night night mode
+					else
+						!=text
+						div.has-text-centered
+							div
+								a(class='button')#shareButton
+									i.fas.fa-share-alt
+block scripts
+	script(src='/js/bible-client.js')
