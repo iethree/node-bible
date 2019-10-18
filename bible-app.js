@@ -39,6 +39,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(PORT,function(){console.log("infopanel on port "+PORT);});
+app.listen(PORT,function(){console.log("bible on port "+PORT);});
 
 module.exports = app;
