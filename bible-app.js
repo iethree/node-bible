@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var index = require('./bible-routes.js');
 
-const PORT = 3002;
+const PORT = 3004;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
