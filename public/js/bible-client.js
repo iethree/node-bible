@@ -103,7 +103,7 @@ function toggleNight(){
 function checkNight(){
 	if(localStorage.night==="true"){
 		document.body.classList.add('night');
-		document.querySelector('meta[name="theme-color"]').setAttribute('content', "#2D2E30");
+		toggleThemeColor();
 	}
 }
 
