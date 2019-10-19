@@ -17,7 +17,6 @@ function handleRecent(){
 	if(passageTitles.length)
 	{
 		var querytext='';
-		console.log(passageTitles);
 			
 		for(let i of passageTitles)
 			querytext+=i.innerText+", ";
@@ -38,34 +37,53 @@ function handleRecent(){
 		output = '';
 		
 		for (cnt=0;cnt<recent.length; cnt++){
-			output+="<p class='control'><a class='button' href='/"+recent[cnt]+"'>"+recent[cnt]+"</a></p>";
+			output+="<p class='control'><a class='button' href='/"+recent[cnt].replace(/\s/g,'')+"'>"+recent[cnt]+"</a></p>";
 		}
 
 		document.getElementById("recent").innerHTML=output;
 	}
 }
 
-document.getElementById("search").addEventListener( "click", search); 
+//search button handler
+document.getElementById("search").addEventListener( "click", ()=>search(document.getElementById("get").value)); 
 
 document.getElementById('get').addEventListener('keyup', (e)=>{
 	if (e.keyCode == 13) { //if user hits enter, search
-		search();
+		search(document.getElementById("get").value);
 	}
 });
 
-function search(){
+function search(query){
 	document.getElementById("loader").classList.add("loader");
-	
-	query = document.getElementById("get").value;
-	window.location.replace("/"+query);
+	fetch("/api/"+query)
+	.then(r=>r.json())
+	.then(r=>{
+		window.history.pushState("object or string", r.title, "/"+r.title.replace(/\s/g,''));
+		document.getElementById("bible-content").innerHTML = r.text;
+		document.querySelector(".lastCH").setAttribute('href', r.prev);
+		document.querySelector(".nextCH").setAttribute('href', r.next);
+
+		document.getElementById("loader").classList.remove("loader");
+		handleRecent();
+	});
 }
 //share button handler
 var shareButton = document.getElementById("shareButton");
 if(shareButton)
 	shareButton.addEventListener('click', share);
+
+//night button handler
 var nightButton = document.getElementById('toggle-night');
 if (nightButton)
 	nightButton.addEventListener('click', toggleNight);
+
+//next/previous handlers
+var lastButton = document.querySelector('.lastCH');
+if(lastButton)
+	lastButton.addEventListener('click', (e)=>{e.preventDefault(); search(lastButton.getAttribute('href')); } );
+var nextButton = document.querySelector('.nextCH')
+if(nextButton)
+	nextButton.addEventListener('click', (e)=>{e.preventDefault(); search(nextButton.getAttribute('href')); } );
 
 function share(){
 	if (navigator.share) { //mobile android only
