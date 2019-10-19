@@ -2,6 +2,8 @@
 
 var recent=[];
 const recentlimit = 8;
+const dayColor = "#e8eaed";
+const nightColor = "#2D2E30";
 handleRecent();
 
 function handleRecent(){
@@ -91,15 +93,25 @@ function share(){
 		
 function toggleNight(){
 	document.body.classList.toggle('night');
-	let night = false;
-	if(localStorage.night==="true")
-		night = true;
+	
+	let night = localStorage.night==="false" ? true : false;
 		
-	localStorage.setItem('night', !night);
+	toggleThemeColor();
+	localStorage.setItem('night', night);
 }
 
 function checkNight(){
-	if(localStorage.night==="true")
+	if(localStorage.night==="true"){
 		document.body.classList.add('night');
+		document.querySelector('meta[name="theme-color"]').setAttribute('content', "#2D2E30");
+	}
+}
+
+function toggleThemeColor(){
+	themeColor = document.querySelector('meta[name="theme-color"]');
+	if(themeColor.getAttribute('content')===nightColor)
+		themeColor.setAttribute('content', dayColor);
+	else
+		themeColor.setAttribute('content', nightColor);
 }
 checkNight();
