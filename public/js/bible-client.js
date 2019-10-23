@@ -4,7 +4,9 @@ var recent=[];
 const recentlimit = 8;
 const dayColor = "#e8eaed";
 const nightColor = "#2D2E30";
+
 handleRecent();
+checkNight();
 
 function handleRecent(){
 	
@@ -37,10 +39,15 @@ function handleRecent(){
 		output = '';
 		
 		for (cnt=0;cnt<recent.length; cnt++){
-			output+="<p class='control'><a class='button' href='/"+recent[cnt].replace(/\s/g,'')+"'>"+recent[cnt]+"</a></p>";
+			output+=`<p class='control'>
+				<a class='button recent-item' href='${searchFriendly(recent[cnt])}'>${recent[cnt]}</a>
+			</p>`;
 		}
 
 		document.getElementById("recent").innerHTML=output;
+		var recentButtons = document.querySelectorAll(".recent-item");
+		for (let i of recentButtons)
+			i.addEventListener('click', (e)=>{e.preventDefault(); search(e.target.getAttribute('href'));});
 	}
 }
 
@@ -54,19 +61,36 @@ document.getElementById('get').addEventListener('keyup', (e)=>{
 });
 
 function search(query){
+	if(!query || query==='/')
+		return;
 	document.getElementById("loader").classList.add("loader");
+	//check localcache
+	var cache = cacheLoad();
+	var result = cacheCheck(cache, query);
+	if(result){
+		writePassage(result);
+		handleRecent();
+		return;
+	}
+
+	//get from api
 	fetch("/api/"+query)
 	.then(r=>r.json())
 	.then(r=>{
-		window.history.pushState("object or string", r.title, "/"+r.title.replace(/\s/g,''));
-		document.getElementById("bible-content").innerHTML = r.text;
-		document.querySelector(".lastCH").setAttribute('href', r.prev);
-		document.querySelector(".nextCH").setAttribute('href', r.next);
-
-		document.getElementById("loader").classList.remove("loader");
+		writePassage(r);
+		cachePush(cache, r);
 		handleRecent();
 	});
 }
+
+function writePassage(r){
+	window.history.pushState("object or string", r.title, "/"+r.title.replace(/\s/g,''));
+	document.getElementById("bible-content").innerHTML = r.text;
+	document.querySelector(".lastCH").setAttribute('href', r.prev);
+	document.querySelector(".nextCH").setAttribute('href', r.next);
+	document.getElementById("loader").classList.remove("loader");
+}
+
 //share button handler
 var shareButton = document.getElementById("shareButton");
 if(shareButton)
@@ -132,4 +156,33 @@ function toggleThemeColor(){
 	else
 		themeColor.setAttribute('content', nightColor);
 }
-checkNight();
+
+//local cache functions
+function cachePush(cache, passage){
+	cache.unshift(passage);
+	if(cache.length>50)
+		cache.pop();
+	localStorage.setItem('cache', JSON.stringify(cache)); //side effect
+	return cache;
+}
+function cacheLoad(){
+	var cache = localStorage.cache;
+	if(cache)
+		cache = JSON.parse(cache);
+	else
+		cache = [];
+	return cache;
+}
+function cacheCheck(cache, title){
+	title = searchFriendly(title);
+	for(i of cache){
+		if(searchFriendly(i.title) === title)
+			return i;
+	}
+	return false;
+}
+
+function searchFriendly(query){
+	return query.toLowerCase().replace(/\s/g,'');
+}
+
