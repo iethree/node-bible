@@ -133,7 +133,9 @@ select{
 .esv-text p{
 	margin: 10px 0;
 }
-
+#shareButton{
+	margin: 10px;
+}
 .settings-btn{
 	position:absolute;
 	top:5px;
@@ -166,6 +168,4 @@ select{
 .night .input::placeholder, .night .title {
 	color: #e8eaed;
 }
-
-
 
