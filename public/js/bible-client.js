@@ -85,10 +85,13 @@ function search(query){
 
 function writePassage(r){
 	window.history.pushState("object or string", r.title, "/"+r.title.replace(/\s/g,''));
+	document.title = r.title;
 	document.getElementById("bible-content").innerHTML = r.text;
 	document.querySelector(".lastCH").setAttribute('href', r.prev);
 	document.querySelector(".nextCH").setAttribute('href', r.next);
 	document.getElementById("loader").classList.remove("loader");
+	window.scroll(0,100);
+	
 }
 
 //share button handler
