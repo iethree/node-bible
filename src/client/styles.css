@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+	html {
+		font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+			Arial, sans-serif;
+	}
+
+	.esv-text h2,
+	.esv-text h3,
+	.esv-text h4 {
+		font-weight: 600;
+		margin-block: 0.75rem;
+	}
+
+	.esv-text h2 {
+		font-size: 1.25rem;
+	}
+
+	.esv-text p {
+		margin-block: 0.75rem;
+		line-height: 1.7;
+	}
+
+	.esv-text .verse-num,
+	.esv-text .chapter-num {
+		position: relative;
+		top: -0.5em;
+		font-size: 0.7em;
+		font-weight: 300;
+		color: var(--color-zinc-500);
+		padding-right: 0.15em;
+	}
+
+	.esv-text .indent,
+	.esv-text blockquote {
+		display: inline-block;
+		padding-left: 1em;
+		text-indent: -1em;
+	}
+
+	.esv-text .line {
+		display: inline-block;
+		padding-left: 0.5em;
+		text-indent: -0.5em;
+	}
+}
