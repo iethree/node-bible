@@ -3,9 +3,23 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+	:root {
+		color-scheme: light;
+		background-color: var(--color-zinc-100);
+	}
+
+	:root.dark {
+		color-scheme: dark;
+		background-color: var(--color-zinc-900);
+	}
+
 	html {
 		font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
 			Arial, sans-serif;
+	}
+
+	body {
+		min-height: 100dvh;
 	}
 
 	.esv-text h2,

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import useSWR from "swr";
 import { type Passage, fetcher, passageKey } from "../lib/api.ts";
 import { pushRecent, readRecent, searchFriendly } from "../lib/recent.ts";
-import { applyTheme, isNight, setNight } from "../lib/theme.ts";
+import { applyTheme, isNight } from "../lib/theme.ts";
 import { PassageView } from "./PassageView.tsx";
 import { RecentList } from "./RecentList.tsx";
 import { SearchBar } from "./SearchBar.tsx";
@@ -18,7 +18,6 @@ export function App() {
 	const [query, setQuery] = useState<string>(urlQuery);
 	const [passage, setPassage] = useState<Passage | null>(null);
 	const [recent, setRecent] = useState<string[]>(readRecent());
-	const [night, setNightState] = useState(isNight());
 	const [atTop, setAtTop] = useState(true);
 	const [atBottom, setAtBottom] = useState(false);
 	const pendingPush = useRef(false);
@@ -27,8 +26,8 @@ export function App() {
 	const mainRef = useRef<HTMLElement>(null);
 
 	useEffect(() => {
-		applyTheme(night);
-	}, [night]);
+		applyTheme(isNight());
+	}, []);
 
 	useEffect(() => {
 		const onScroll = () => {
@@ -88,12 +87,6 @@ export function App() {
 
 	const onSearch = (q: string) => performLoad(q, { addToRecent: true });
 	const onNavigate = (q: string) => performLoad(q, { addToRecent: false });
-
-	const toggleNight = () => {
-		const next = !night;
-		setNight(next);
-		setNightState(next);
-	};
 
 	const goHome = (e: Event) => {
 		e.preventDefault();
