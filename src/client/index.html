@@ -3,9 +3,20 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" viewport-fit="cover" />
-		<meta name="theme-color" content="#f4f4f5" media="(prefers-color-scheme: light)" />
-		<meta name="theme-color" content="#18181b" media="(prefers-color-scheme: dark)" />
 		<meta name="theme-color" content="#f4f4f5" />
+		<script>
+			// Apply theme before paint so the address bar and page background match.
+			(function () {
+				var saved = localStorage.getItem("night");
+				var night =
+					saved === "true" ||
+					(saved === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
+				if (night) document.documentElement.classList.add("dark");
+				document
+					.querySelector('meta[name="theme-color"]')
+					.setAttribute("content", night ? "#18181b" : "#f4f4f5");
+			})();
+		</script>
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="mobile-web-app-capable" content="yes" />
 		<link rel="icon" href="/favicon.png" />
