@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import useSWR from "swr";
 import { type Passage, fetcher, passageKey } from "../lib/api.ts";
 import { pushRecent, readRecent, searchFriendly } from "../lib/recent.ts";
-import { applyTheme, isNight } from "../lib/theme.ts";
+import { applyTheme, isNight, setNight } from "../lib/theme.ts";
 import { PassageView } from "./PassageView.tsx";
 import { RecentList } from "./RecentList.tsx";
 import { SearchBar } from "./SearchBar.tsx";
@@ -18,7 +18,7 @@ export function App() {
 	const [query, setQuery] = useState<string>(urlQuery);
 	const [passage, setPassage] = useState<Passage | null>(null);
 	const [recent, setRecent] = useState<string[]>(readRecent());
-	const [night] = useState(isNight());
+	const [night, setNightState] = useState(isNight());
 	const [atTop, setAtTop] = useState(true);
 	const [atBottom, setAtBottom] = useState(false);
 	const pendingPush = useRef(false);
@@ -33,7 +33,9 @@ export function App() {
 	useEffect(() => {
 		const onScroll = () => {
 			setAtTop(window.scrollY < SCROLL_THRESHOLD);
-			setAtBottom(window.innerHeight + window.scrollY >= document.body.scrollHeight - SCROLL_THRESHOLD);
+			setAtBottom(
+				window.innerHeight + window.scrollY >= document.body.scrollHeight - SCROLL_THRESHOLD,
+			);
 		};
 		window.addEventListener("scroll", onScroll, { passive: true });
 		return () => window.removeEventListener("scroll", onScroll);
@@ -87,6 +89,12 @@ export function App() {
 	const onSearch = (q: string) => performLoad(q, { addToRecent: true });
 	const onNavigate = (q: string) => performLoad(q, { addToRecent: false });
 
+	const toggleNight = () => {
+		const next = !night;
+		setNight(next);
+		setNightState(next);
+	};
+
 	const goHome = (e: Event) => {
 		e.preventDefault();
 		window.history.pushState({}, "Bible", "/");
@@ -112,7 +120,7 @@ export function App() {
 					atTop ? "opacity-100" : "pointer-events-none opacity-0"
 				}`}
 			>
-				<header class="mb-2 flex items-center justify-center">
+				<header class="relative mb-2 flex items-center justify-center">
 					<a href="/" class="text-xl font-semibold tracking-tight" onClick={goHome}>
 						Bible
 					</a>

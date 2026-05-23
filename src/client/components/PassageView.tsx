@@ -77,7 +77,9 @@ export function PassageView({ passage, onNavigate, atBottom }: Props) {
 				dangerouslySetInnerHTML={{ __html: passage.text }}
 			/>
 
-			<div class={`mt-8 flex items-center justify-between gap-2 text-sm ${atBottom ? "opacity-100" : "pointer-events-none opacity-0"} transition-opacity duration-200 ease-out`}>
+			<div
+				class={`mt-8 flex items-center justify-between gap-2 text-sm ${atBottom ? "opacity-100" : "pointer-events-none opacity-0"} transition-opacity duration-200 ease-out`}
+			>
 				<button
 					type="button"
 					disabled={!passage.prev}
