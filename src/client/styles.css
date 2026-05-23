@@ -60,4 +60,24 @@
 		padding-left: 0.5em;
 		text-indent: -0.5em;
 	}
+
+	.highlight {
+		text-decoration: underline dotted;
+		text-decoration-thickness: 1.5px;
+		text-underline-offset: 3px;
+		text-decoration-color: var(--color-zinc-500);
+		cursor: pointer;
+	}
+
+	.highlight.has-note {
+		text-decoration-color: var(--color-violet-950);
+	}
+
+	.dark .highlight {
+		text-decoration-color: var(--color-zinc-400);
+	}
+
+	.dark .highlight.has-note {
+		text-decoration-color: var(--color-violet-300);
+	}
 }
