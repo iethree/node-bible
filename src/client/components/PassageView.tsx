@@ -110,17 +110,22 @@ export function PassageView({ passage, onNavigate, atBottom }: Props) {
 		};
 	}, [passage.next, passage.prev, onNavigate]);
 
-	// Watch for the user finishing a selection.
+	// Watch for the user finishing a selection. Listen to selectionchange (the
+	// spec-level signal) and debounce so the popup appears AFTER the user stops
+	// adjusting selection handles on mobile, not on every intermediate tick.
 	useEffect(() => {
 		const el = textRef.current;
 		if (!el) return;
+		let timer: ReturnType<typeof setTimeout> | null = null;
 
 		const checkSelection = () => {
+			const sel = window.getSelection();
+			if (!sel || sel.isCollapsed) return;
 			const offsets = getSelectionOffsets(el);
 			if (!offsets) return;
 			const rect = getSelectionRect();
 			if (!rect) return;
-			const text = (window.getSelection()?.toString() ?? "").trim();
+			const text = sel.toString().trim();
 			if (!text) return;
 			const articleRect = articleRef.current?.getBoundingClientRect();
 			if (!articleRect) return;
@@ -131,11 +136,15 @@ export function PassageView({ passage, onNavigate, atBottom }: Props) {
 			});
 		};
 
-		el.addEventListener("mouseup", checkSelection);
-		el.addEventListener("touchend", checkSelection);
+		const onSelectionChange = () => {
+			if (timer) clearTimeout(timer);
+			timer = setTimeout(checkSelection, 350);
+		};
+
+		document.addEventListener("selectionchange", onSelectionChange);
 		return () => {
-			el.removeEventListener("mouseup", checkSelection);
-			el.removeEventListener("touchend", checkSelection);
+			document.removeEventListener("selectionchange", onSelectionChange);
+			if (timer) clearTimeout(timer);
 		};
 	}, []);
 
