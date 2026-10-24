@@ -1,10 +1,12 @@
-import "dotenv/config";
 import { createApp } from "./app.ts";
-import { log } from "./log.ts";
 
-const PORT = Number(process.env.PORT ?? 3004);
-const { app } = createApp();
+export interface Env {
+	DB: D1Database;
+	ESVTOKEN: string;
+}
 
-app.listen(PORT, () => {
-	log.success(`bible on port ${PORT}`);
-});
+export default {
+	fetch(req, env) {
+		return createApp({ db: env.DB, authToken: env.ESVTOKEN })(req);
+	},
+} satisfies ExportedHandler<Env>;

@@ -22,5 +22,8 @@
 			"react-dom": ["./node_modules/preact/compat/"]
 		}
 	},
-	"include": ["src/**/*", "vite.config.ts", "ecosystem.config.cjs"]
+	// The Worker is checked separately by tsconfig.server.json: its ambient
+	// globals (Request, Response, fetch) clash with the DOM lib. Server tests run
+	// under Bun and are not type-checked by either config.
+	"include": ["src/client/**/*", "vite.config.ts"]
 }

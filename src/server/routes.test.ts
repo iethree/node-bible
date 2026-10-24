@@ -1,17 +1,6 @@
-import { afterAll, beforeAll, describe, expect, mock, test } from "bun:test";
-import type { Server } from "node:http";
-import { type AddressInfo, createServer } from "node:net";
+import { describe, expect, mock, test } from "bun:test";
 import { createApp } from "./app.ts";
-
-function getFreePort(): Promise<number> {
-	return new Promise((resolve, reject) => {
-		const srv = createServer();
-		srv.listen(0, () => {
-			const addr = srv.address() as AddressInfo;
-			srv.close((err) => (err ? reject(err) : resolve(addr.port)));
-		});
-	});
-}
+import { createTestD1 } from "./test-d1.ts";
 
 const mockEsv = mock(async (input: URL | RequestInfo) => {
 	const url = String(input);
@@ -35,34 +24,15 @@ const mockEsv = mock(async (input: URL | RequestInfo) => {
 	);
 }) as unknown as typeof fetch;
 
-let server: Server;
-let baseUrl: string;
+const handle = createApp({ db: createTestD1(), authToken: "test-token", fetchImpl: mockEsv });
 
-beforeAll(async () => {
-	const port = await getFreePort();
-	const { app } = createApp({
-		dbPath: ":memory:",
-		authToken: "test-token",
-		clientDir: "/nonexistent",
-		publicDir: "/nonexistent",
-		enableLogger: false,
-		fetchImpl: mockEsv,
-	});
-	await new Promise<void>((resolve) => {
-		server = app.listen(port, () => resolve());
-	});
-	baseUrl = `http://127.0.0.1:${port}`;
-});
-
-afterAll(async () => {
-	await new Promise<void>((resolve, reject) =>
-		server.close((err) => (err ? reject(err) : resolve())),
-	);
-});
+function get(path: string) {
+	return handle(new Request(`http://bible.test${path}`));
+}
 
 describe("GET /api/:query", () => {
 	test("returns the passage as JSON", async () => {
-		const res = await fetch(`${baseUrl}/api/jn3.16`);
+		const res = await get("/api/jn3.16");
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { title: string; text: string };
 		expect(body.title).toBe("John 3:16");
@@ -72,7 +42,7 @@ describe("GET /api/:query", () => {
 
 describe("GET /api/roa", () => {
 	test("returns a rule of acquisition", async () => {
-		const res = await fetch(`${baseUrl}/api/roa`);
+		const res = await get("/api/roa");
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { reference: string; text: string };
 		expect(body.reference).toMatch(/^Rule of Acquisition Number \d+$/);
@@ -82,7 +52,7 @@ describe("GET /api/roa", () => {
 
 describe("GET /api/rp", () => {
 	test("returns either a proverb or an ROA", async () => {
-		const res = await fetch(`${baseUrl}/api/rp`);
+		const res = await get("/api/rp");
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { reference: string; text: string };
 		expect(typeof body.reference).toBe("string");
@@ -92,8 +62,13 @@ describe("GET /api/rp", () => {
 });
 
 describe("unknown routes", () => {
-	test("non-api routes 404 when no client bundle is present", async () => {
-		const res = await fetch(`${baseUrl}/anything-else`);
+	test("non-api routes 404 (static assets are served before the Worker)", async () => {
+		const res = await get("/anything-else");
+		expect(res.status).toBe(404);
+	});
+
+	test("non-GET api requests 404", async () => {
+		const res = await handle(new Request("http://bible.test/api/roa", { method: "POST" }));
 		expect(res.status).toBe(404);
 	});
 });

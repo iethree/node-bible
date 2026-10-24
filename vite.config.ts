@@ -12,7 +12,8 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		proxy: {
-			"/api": "http://localhost:3004",
+			// `bun run dev` (wrangler dev) serves the API on 8787.
+			"/api": "http://localhost:8787",
 		},
 	},
 });

@@ -1,92 +1,86 @@
 import { describe, expect, test } from "bun:test";
 import { createStore } from "./db.ts";
+import { createTestD1 } from "./test-d1.ts";
 
 function newStore() {
-	return createStore(":memory:");
+	return createStore(createTestD1());
 }
 
 describe("db store", () => {
-	test("returns null for an unknown passage", () => {
+	test("returns null for an unknown passage", async () => {
 		const store = newStore();
-		expect(store.findPassageByQuery("nope")).toBeNull();
-		store.close();
+		expect(await store.findPassageByQuery("nope")).toBeNull();
 	});
 
-	test("savePassage round-trips by canonical title", () => {
+	test("savePassage round-trips by canonical title", async () => {
 		const store = newStore();
-		store.savePassage("jn 3.16", {
+		await store.savePassage("jn 3.16", {
 			title: "John 3:16",
 			text: "For God so loved...",
 			next: "John 4",
 			prev: "John 3:15",
 		});
-		const found = store.findPassageByQuery("jn 3.16");
+		const found = await store.findPassageByQuery("jn 3.16");
 		expect(found?.title).toBe("John 3:16");
 		expect(found?.text).toBe("For God so loved...");
-		store.close();
 	});
 
-	test("savePassage indexes the canonical title as a query", () => {
+	test("savePassage indexes the canonical title as a query", async () => {
 		const store = newStore();
-		store.savePassage("jn 3.16", {
+		await store.savePassage("jn 3.16", {
 			title: "John 3:16",
 			text: "...",
 			next: "",
 			prev: "",
 		});
-		const byTitle = store.findPassageByQuery("John 3:16");
+		const byTitle = await store.findPassageByQuery("John 3:16");
 		expect(byTitle?.title).toBe("John 3:16");
-		store.close();
 	});
 
-	test("savePassage adds new query aliases to an existing passage", () => {
+	test("savePassage adds new query aliases to an existing passage", async () => {
 		const store = newStore();
-		store.savePassage("John 3:16", {
+		await store.savePassage("John 3:16", {
 			title: "John 3:16",
 			text: "...",
 			next: "",
 			prev: "",
 		});
-		store.savePassage("john3.16", {
+		await store.savePassage("john3.16", {
 			title: "John 3:16",
 			text: "...",
 			next: "",
 			prev: "",
 		});
-		expect(store.findPassageByQuery("john3.16")?.title).toBe("John 3:16");
-		store.close();
+		expect((await store.findPassageByQuery("john3.16"))?.title).toBe("John 3:16");
 	});
 
-	test("findPassageByQuery is case-sensitive (caller normalises)", () => {
+	test("findPassageByQuery is case-sensitive (caller normalises)", async () => {
 		const store = newStore();
-		store.savePassage("John 3:16", {
+		await store.savePassage("John 3:16", {
 			title: "John 3:16",
 			text: "...",
 			next: "",
 			prev: "",
 		});
-		expect(store.findPassageByQuery("john 3:16")).toBeNull();
-		store.close();
+		expect(await store.findPassageByQuery("john 3:16")).toBeNull();
 	});
 
-	test("proverbs round-trip on query", () => {
+	test("proverbs round-trip on query", async () => {
 		const store = newStore();
-		store.saveProverb({
+		await store.saveProverb({
 			query: "20010001",
 			title: "Proverbs 1:1",
 			text: "The proverbs of Solomon",
 		});
-		const got = store.findProverbByQuery("20010001");
+		const got = await store.findProverbByQuery("20010001");
 		expect(got?.title).toBe("Proverbs 1:1");
 		expect(got?.text).toMatch(/Solomon/);
-		store.close();
 	});
 
-	test("saveProverb overwrites an existing entry", () => {
+	test("saveProverb overwrites an existing entry", async () => {
 		const store = newStore();
-		store.saveProverb({ query: "q", title: "T1", text: "x" });
-		store.saveProverb({ query: "q", title: "T2", text: "y" });
-		expect(store.findProverbByQuery("q")?.title).toBe("T2");
-		store.close();
+		await store.saveProverb({ query: "q", title: "T1", text: "x" });
+		await store.saveProverb({ query: "q", title: "T2", text: "y" });
+		expect((await store.findProverbByQuery("q"))?.title).toBe("T2");
 	});
 });

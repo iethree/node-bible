@@ -1,0 +1,9 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"types": ["@cloudflare/workers-types"]
+	},
+	"include": ["src/server/**/*"],
+	"exclude": ["**/*.test.ts", "src/server/test-d1.ts"]
+}

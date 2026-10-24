@@ -79,7 +79,7 @@ export function createBible(config: BibleConfig) {
 	const doFetch = config.fetchImpl ?? fetch;
 
 	async function get(query: string): Promise<Passage> {
-		const cached = store.findPassageByQuery(query);
+		const cached = await store.findPassageByQuery(query);
 		if (cached) {
 			log.info(`found in db: ${cached.title}`);
 			return cached;
@@ -87,7 +87,7 @@ export function createBible(config: BibleConfig) {
 
 		const fetched = await fetchPassage(query);
 		if (fetched) {
-			store.savePassage(query, fetched);
+			await store.savePassage(query, fetched);
 			return fetched;
 		}
 
@@ -122,7 +122,7 @@ export function createBible(config: BibleConfig) {
 	async function getRandomProverb(rng: () => number = Math.random): Promise<Proverb | null> {
 		const { query } = pickRandomProverbRef(rng);
 
-		const cached = store.findProverbByQuery(query);
+		const cached = await store.findProverbByQuery(query);
 		if (cached) {
 			log.info("found proverb in db");
 			return cached;
@@ -150,7 +150,7 @@ export function createBible(config: BibleConfig) {
 			query,
 		};
 		log.info(`saving to DB: ${proverb.title}`);
-		store.saveProverb(proverb);
+		await store.saveProverb(proverb);
 		return proverb;
 	}
 

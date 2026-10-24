@@ -1,7 +1,3 @@
-import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-
 export interface Passage {
 	title: string;
 	text: string;
@@ -16,94 +12,64 @@ export interface Proverb {
 }
 
 export interface BibleStore {
-	findPassageByQuery(query: string): Passage | null;
-	savePassage(query: string, passage: Passage): void;
-	findProverbByQuery(query: string): Proverb | null;
-	saveProverb(proverb: Proverb): void;
-	close(): void;
+	findPassageByQuery(query: string): Promise<Passage | null>;
+	savePassage(query: string, passage: Passage): Promise<void>;
+	findProverbByQuery(query: string): Promise<Proverb | null>;
+	saveProverb(proverb: Proverb): Promise<void>;
 }
 
-export function createStore(dbPath: string): BibleStore {
-	if (dbPath !== ":memory:") {
-		mkdirSync(dirname(dbPath), { recursive: true });
-	}
-
-	const db = new Database(dbPath);
-	db.exec("PRAGMA journal_mode = WAL");
-
-	db.exec(`
-		CREATE TABLE IF NOT EXISTS passages (
-			title TEXT PRIMARY KEY,
-			text  TEXT NOT NULL,
-			next  TEXT NOT NULL DEFAULT '',
-			prev  TEXT NOT NULL DEFAULT '',
-			views INTEGER NOT NULL DEFAULT 1
-		);
-		CREATE TABLE IF NOT EXISTS passage_queries (
-			query TEXT PRIMARY KEY,
-			title TEXT NOT NULL REFERENCES passages(title) ON DELETE CASCADE
-		);
-		CREATE INDEX IF NOT EXISTS idx_passage_queries_title ON passage_queries(title);
-		CREATE TABLE IF NOT EXISTS proverbs (
-			query TEXT PRIMARY KEY,
-			title TEXT NOT NULL,
-			text  TEXT NOT NULL
-		);
-	`);
-
-	const selectPassageByQuery = db.query<Passage, [string]>(`
-		SELECT p.title, p.text, p.next, p.prev
-		FROM passages p
-		JOIN passage_queries q ON q.title = p.title
-		WHERE q.query = ?
-	`);
-	const selectPassageByTitle = db.query<{ title: string }, [string]>(
-		"SELECT title FROM passages WHERE title = ?",
-	);
-	const insertPassage = db.prepare(
-		"INSERT INTO passages (title, text, next, prev) VALUES (?, ?, ?, ?)",
-	);
-	const insertQuery = db.prepare(
-		"INSERT OR IGNORE INTO passage_queries (query, title) VALUES (?, ?)",
-	);
-	const incrementViews = db.prepare("UPDATE passages SET views = views + 1 WHERE title = ?");
-
-	const selectProverbByQuery = db.query<Proverb, [string]>(
-		"SELECT title, text, query FROM proverbs WHERE query = ?",
-	);
-	const insertProverb = db.prepare(
-		"INSERT OR REPLACE INTO proverbs (query, title, text) VALUES (?, ?, ?)",
-	);
+// Schema lives in migrations/ and is applied with `wrangler d1 migrations apply`.
+export function createStore(db: D1Database): BibleStore {
+	const insertQuery = (query: string, title: string) =>
+		db
+			.prepare("INSERT OR IGNORE INTO passage_queries (query, title) VALUES (?, ?)")
+			.bind(query, title);
 
 	return {
-		findPassageByQuery(query) {
-			return selectPassageByQuery.get(query) ?? null;
+		async findPassageByQuery(query) {
+			return db
+				.prepare(
+					`SELECT p.title, p.text, p.next, p.prev
+					FROM passages p
+					JOIN passage_queries q ON q.title = p.title
+					WHERE q.query = ?`,
+				)
+				.bind(query)
+				.first<Passage>();
 		},
-
-		savePassage(query, passage) {
-			const existing = selectPassageByTitle.get(passage.title);
+		async savePassage(query, passage) {
+			const existing = await db
+				.prepare("SELECT title FROM passages WHERE title = ?")
+				.bind(passage.title)
+				.first<{ title: string }>();
 			if (existing) {
-				insertQuery.run(query, passage.title);
-				incrementViews.run(passage.title);
+				await db.batch([
+					insertQuery(query, passage.title),
+					db.prepare("UPDATE passages SET views = views + 1 WHERE title = ?").bind(passage.title),
+				]);
 				return;
 			}
-			db.transaction(() => {
-				insertPassage.run(passage.title, passage.text, passage.next, passage.prev);
-				insertQuery.run(passage.title, passage.title);
-				if (query !== passage.title) insertQuery.run(query, passage.title);
-			})();
+			// batch() runs as a single transaction.
+			const statements = [
+				db
+					.prepare("INSERT INTO passages (title, text, next, prev) VALUES (?, ?, ?, ?)")
+					.bind(passage.title, passage.text, passage.next, passage.prev),
+				insertQuery(passage.title, passage.title),
+			];
+			if (query !== passage.title) statements.push(insertQuery(query, passage.title));
+			await db.batch(statements);
 		},
-
-		findProverbByQuery(query) {
-			return selectProverbByQuery.get(query) ?? null;
+		async findProverbByQuery(query) {
+			return db
+				.prepare("SELECT title, text, query FROM proverbs WHERE query = ?")
+				.bind(query)
+				.first<Proverb>();
 		},
-
-		saveProverb(proverb) {
-			insertProverb.run(proverb.query, proverb.title, proverb.text);
-		},
-
-		close() {
-			db.close();
+		async saveProverb(proverb) {
+			await db
+				.prepare("INSERT OR REPLACE INTO proverbs (query, title, text) VALUES (?, ?, ?)")
+				.bind(proverb.query, proverb.title, proverb.text)
+				.run();
 		},
 	};
 }

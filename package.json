@@ -4,41 +4,36 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "concurrently -k -n server,client -c blue,magenta \"bun run dev:server\" \"bun run dev:client\"",
-		"dev:server": "bun --watch src/server/index.ts",
+		"dev": "wrangler dev",
 		"dev:client": "vite",
 		"build": "vite build",
+		"deploy": "wrangler deploy",
+		"db:migrate:local": "wrangler d1 migrations apply bible --local",
+		"db:migrate": "wrangler d1 migrations apply bible --remote",
+		"typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json",
 		"test": "bun test",
 		"lint": "biome check .",
 		"format": "biome format --write .",
-		"fix": "biome check --write .",
-		"pm2:start": "pm2 start ecosystem.config.cjs --env production",
-		"start": "bun run build && bun run pm2:start"
+		"fix": "biome check --write ."
 	},
 	"dependencies": {
-		"dotenv": "^16.4.7",
-		"express": "^5.0.1",
 		"idb": "^8.0.3",
-		"morgan": "^1.10.0",
 		"preact": "^10.25.4",
-		"serve-favicon": "^2.5.0",
 		"swr": "^2.4.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"@cloudflare/workers-types": "^5.20261024.1",
 		"@happy-dom/global-registrator": "^20.9.0",
 		"@preact/preset-vite": "^2.9.3",
 		"@tailwindcss/vite": "^4.0.0",
 		"@types/bun": "^1.1.18",
-		"@types/express": "^5.0.0",
-		"@types/morgan": "^1.9.9",
-		"@types/serve-favicon": "^2.5.7",
-		"concurrently": "^9.1.2",
 		"fake-indexeddb": "^6.2.5",
 		"happy-dom": "^20.9.0",
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.7.3",
-		"vite": "^6.0.7"
+		"vite": "^6.0.7",
+		"wrangler": "^4.152.0"
 	},
 	"license": "MIT"
 }
